@@ -2,4 +2,4 @@
 
 require './lib/deep_blame'
 
-DeepBlame.line_history('README.md', 1)
+DeepBlame.line_history('lib/deep_blame.rb', 1,9)
