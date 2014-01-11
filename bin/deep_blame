@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require './lib/deep_blame'
+
+DeepBlame.line_history('README.md', 1)
