@@ -4,7 +4,10 @@ require_relative "deep_blame/version"
 module DeepBlame
   def self.line_history(path, start_line, end_line = nil, rev = 'HEAD')
     blames = Blame.find(rev, path, start_line, end_line)
-    blames.each {|blame| display(blame) }
+    # blames.each {|blame| display(blame) }
+    # blames.each {|blame| blame.recursive.each {|b| display_commit_messages(b) } }
+    blames.each {|blame| blame.recursive.each {|b| display_full_concise(b) } }
+    # blames.each {|blame| blame.recursive.each {|b| display_full_commit_messages(b) } }
   end
 
   def self.display(blame)
@@ -13,6 +16,26 @@ module DeepBlame
       print " -> #{blame.short_sha}"
     end
     puts "."
+  end
+
+  def self.display_commit_messages(blame)
+    puts "#{blame.short_sha} (#{blame.committed_at.to_date}): #{blame.summary} <#{blame.author}> "
+  end
+
+  def self.display_full_commit_messages(blame)
+    puts "#{blame.sha}: <#{blame.author}>"
+    puts commit_message(blame.sha)
+  end
+
+  def self.commit_message(sha)
+    result = `git show #{sha}`
+    result.sub(/\A[\S\s]+^Date.+/,'').sub(/^diff[\S\s]+\Z/,'')
+  end
+
+  def self.display_full_concise(blame)
+    puts "#{blame.sha}: <#{blame.author}>"
+    message = commit_message(blame.sha)
+    puts message.gsub(/\s+/, ' ')
   end
 
   class Blame
@@ -56,8 +79,22 @@ module DeepBlame
        end
     end
 
+    def recursive
+      all = [self]
+      all += parent.recursive if parent
+      all
+    end
+
+    def committed_at
+      @committed_at ||= Time.at(committer_time.to_i)
+    end
+
     def short_sha
       sha[0..6]
+    end
+
+    def previous?
+      previous # or !boundary # ?
     end
 
     def previous_sha
@@ -74,7 +111,11 @@ module DeepBlame
 
     # rev, path, start_line, end_line = nil
     def parent
-      self.class.find(previous_sha, previous_file, previous_line_number).first unless boundary
+      if previous?
+        @parent_results = self.class.find(previous_sha, previous_file, previous_line_number)
+        puts "#{@parent_result.length} results for #{previous_sha}. Interesting." if @parent_results.length > 1
+        @parent_results.first
+      end
     end
   end
 end
