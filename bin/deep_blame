@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require './lib/deep_blame'
+require File.expand_path(File.join(File.dirname(__FILE__), "..")) + "/lib/deep_blame"
 
 unless ARGV.first
   puts "format: deep_blame <filepath> <startline>,<endline(optional)>"
