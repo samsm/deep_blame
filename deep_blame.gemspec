@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = DeepBlame::VERSION
   spec.authors       = ["Sam Schenkman-Moore"]
   spec.email         = ["samsm@samsm.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = %q{Recursive blame.}
+  spec.summary       = %q{Recursive blame.}
   spec.homepage      = ""
   spec.license       = "MIT"
 
