@@ -2,4 +2,9 @@
 
 require './lib/deep_blame'
 
-DeepBlame.line_history('lib/deep_blame.rb', 1,9)
+unless ARGV.first
+  puts "format: deep_blame <filepath> <startline>,<endline(optional)>"
+else
+  start_line, end_line = ARGV.last.split(",")
+  DeepBlame.line_history(ARGV.first, start_line, end_line)
+end
