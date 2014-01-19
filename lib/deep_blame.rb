@@ -2,28 +2,33 @@ require 'pry'
 require_relative "deep_blame/version"
 
 module DeepBlame
-  def self.line_history(path, start_line, end_line = nil, rev = 'HEAD')
-    blames = Blame.find(rev, path, start_line, end_line)
-    # blames.each {|blame| display(blame) }
-    # blames.each {|blame| blame.recursive.each {|b| display_commit_messages(b) } }
-    blames.each {|blame| blame.recursive.each {|b| display_full_concise(b) } }
-    # blames.each {|blame| blame.recursive.each {|b| display_full_commit_messages(b) } }
-  end
-
-  def self.display(blame)
-    print "Blame shas: #{blame.short_sha}"
-    while (blame = blame.parent) do
-      print " -> #{blame.short_sha}"
+  def self.line_history(path, start_line, end_line = nil, rev = 'HEAD', options)
+    blames = Blame.find_recursive_uniq(rev, path, start_line, end_line)
+    blames.each do |b|
+      case options[:display]
+      when "ids"
+        display_ids(b)
+      when "commits"
+        display_commit_messages(b)
+      when "full"
+        display_full_commit_messages(b)
+      else
+        display_full_concise(b)
+      end
     end
-    puts "."
+    puts if options[:display] == "ids"
   end
 
   def self.display_commit_messages(blame)
     puts "#{blame.short_sha} (#{blame.committed_at.to_date}): #{blame.summary} <#{blame.author}> "
   end
 
+  def self.display_ids(blame)
+    print "#{blame.short_sha} "
+  end
+
   def self.display_full_commit_messages(blame)
-    puts "#{blame.sha}: <#{blame.author}>"
+    puts "#{blame.short_sha}: <#{blame.author}>"
     puts commit_message(blame.sha)
   end
 
@@ -33,7 +38,7 @@ module DeepBlame
   end
 
   def self.display_full_concise(blame)
-    puts "#{blame.sha}: <#{blame.author}>"
+    puts "#{blame.short_sha}: <#{blame.author}>"
     message = commit_message(blame.sha)
     puts message.gsub(/\s+/, ' ')
   end
@@ -48,6 +53,11 @@ module DeepBlame
       segments.collect do |segment|
         new parse_segment(segment)
       end
+    end
+
+    def self.find_recursive_uniq(*args)
+      result = find(*args)
+      result.collect {|r| r.recursive }.flatten.uniq {|b| b.sha }
     end
 
     def self.parse_segment(blame)

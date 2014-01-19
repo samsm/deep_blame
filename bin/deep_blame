@@ -2,9 +2,18 @@
 
 require File.expand_path(File.join(File.dirname(__FILE__), "..")) + "/lib/deep_blame"
 
-unless ARGV.first
+begin
+  start_line, end_line = ARGV[1].split(",")
+rescue
   puts "format: deep_blame <filepath> <startline>,<endline(optional)>"
-else
-  start_line, end_line = ARGV.last.split(",")
-  DeepBlame.line_history(ARGV.first, start_line, end_line)
+  exit
 end
+
+raw_options = ARGV[2..-1] || Array.new
+options = raw_options.inject({}) do |opts, o|
+  k,v = o.split("=")
+  opts[k.sub(/\A-+/,'').to_sym] = v || true
+  opts
+end
+
+DeepBlame.line_history(ARGV.first, start_line, end_line, 'HEAD', options)
