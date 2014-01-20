@@ -1,24 +1,25 @@
 # DeepBlame
 
-TODO: Write a gem description
+Look at the blame before the blame (before the blame...).
+
+Bit of an experiment. No tests, you might die.
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-    gem 'deep_blame'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install deep_blame
+gem install deep_blame
 
 ## Usage
 
-TODO: Write usage instructions here
+deep_blame path line_number
+deep_blame path start_line,end_line
+deep_blame path line_number --display=ids
+
+### Display Options
+
+* ids (space separated list of ids)
+* commits (fairly readable list of commits)
+* full (shows whole, multi-line commit message)
+* default (full commit messages, linebreaks removed)
 
 ## Contributing
 
